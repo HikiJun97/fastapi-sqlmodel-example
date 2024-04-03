@@ -1,2 +1,5 @@
 fastapi
 uvicorn
+aiomysql
+sqlalchemy
+python-dotenv
