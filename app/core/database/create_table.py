@@ -3,17 +3,16 @@ import os
 from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import (
     create_async_engine,
-    async_sessionmaker,
     AsyncEngine,
-    AsyncSession,
     AsyncAttrs,
 )
 from sqlalchemy import String, Integer
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
-load_dotenv("/Users/hikijun/fastapi-example/app/.env")
+load_dotenv()
 
 DATABASE_URL = f"mysql+aiomysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DATABASE')}"
+print("DATABASE_URL:", DATABASE_URL)
 async_engine = create_async_engine(DATABASE_URL, echo=True)
 
 

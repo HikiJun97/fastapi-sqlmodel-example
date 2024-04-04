@@ -10,6 +10,9 @@ from app.routers.main import router
 from contextlib import asynccontextmanager
 from app.core.database.engine import async_engine
 from app.dependencies import auth_api_key
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 @asynccontextmanager
