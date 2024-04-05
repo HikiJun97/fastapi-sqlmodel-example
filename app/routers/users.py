@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Any
 from fastapi import APIRouter, HTTPException, Depends, Query, Path, status
 from sqlalchemy import select, insert, delete
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,8 +12,8 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 @router.get("/")
 async def get_user(
-    id: Annotated[int, Query(title="Query user through user id")],
-    session: AsyncSession = Depends(get_async_session),
+    session: Annotated[AsyncSession, Depends(get_async_session)],
+    id: Annotated[int, Query(title="Query user through user id")]
 ):
     try:
         users = (await session.scalars(select(User).where(User.id == id))).all()
@@ -24,8 +24,8 @@ async def get_user(
 
 @router.post("", status_code=status.HTTP_201_CREATED)
 async def create_user(
-    user_data: UserCreate,
-    session: AsyncSession = Depends(get_async_session),
+    session: Annotated[AsyncSession, Depends(get_async_session)],
+    user_data: UserCreate
 ):
     try:
         session.add(
@@ -41,9 +41,9 @@ async def create_user(
 
 @router.patch("/{user_id}")
 async def update_user(
+    session: Annotated[AsyncSession, Depends(get_async_session)],
     user_data: UserUpdate,
-    user_id: int = Path(title="The ID of user to update"),
-    session: AsyncSession = Depends(get_async_session),
+    user_id: int = Path(title="The ID of user to update")
 ):
     try:
         user = (await session.scalars(select(User).where(User.id == user_id))).first()
@@ -57,9 +57,9 @@ async def update_user(
 
 @router.put("/{user_id}")
 async def replace_user(
+    session: Annotated[AsyncSession, Depends(get_async_session)],
     user_data: UserReplace,
-    user_id: int = Path(title="The ID of user to update"),
-    session: AsyncSession = Depends(get_async_session),
+    user_id: int = Path(title="The ID of user to update")
 ):
     try:
         user = (await session.scalars(select(User).where(User.id == user_id))).first()
@@ -72,8 +72,8 @@ async def replace_user(
 
 @router.delete("/{user_id}")
 async def delete_user(
-    user_id: int = Path(title="The ID of user to update"),
-    session: AsyncSession = Depends(get_async_session),
+    session: Annotated[AsyncSession, Depends(get_async_session)],
+    user_id: int = Path(title="The ID of user to update")
 ):
     try:
         await session.execute(delete(User).where(User.id == user_id))
