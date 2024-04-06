@@ -7,16 +7,20 @@ from app.core.database.models import User
 from app.dependencies import get_async_session
 
 
-router = APIRouter(prefix="/users", tags=["users"])
+router = APIRouter(
+    prefix="/users",
+    tags=["users"]
+)
 
-
-@router.get("/")
+@router.get("")
 async def get_user(
     session: Annotated[AsyncSession, Depends(get_async_session)],
-    id: Annotated[int, Query(title="Query user through user id")]
+    # id: Annotated[int, Query(title="Query user through user id", description="Query user through user id")],
+    name: Annotated[str, Query(title="Query user through user name", description="Query user through user name")]
 ):
     try:
-        users = (await session.scalars(select(User).where(User.id == id))).all()
+        users = (await session.scalars(select(User).where(User.name == name))).one()
+        print("users type:", type(users))
         return users
     except:
         raise

@@ -12,9 +12,6 @@ from app.core.database.engine import async_engine
 from app.dependencies import auth_api_key
 from dotenv import load_dotenv
 
-load_dotenv()
-
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     yield
@@ -41,9 +38,3 @@ async def validation_exception_handler(request, exc):
 @app.get("/")
 async def root():
     return {"msg": "main page"}
-
-
-if __name__ == "__main__":
-    import uvicorn
-
-    uvicorn.run(app="main:app", host="0.0.0.0", port=8000, reload=True)
