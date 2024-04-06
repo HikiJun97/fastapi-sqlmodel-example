@@ -12,8 +12,8 @@ app = FastAPI(
 
 FastAPIConfigs(app)  # define lifespan, exception handlers
 
-# prevent 307 Temporary Redirect due to '/' at the end of endpoint
-app.router.redirect_slashes = False
+# Prevent 307 Temporary Redirect due to '/' at the end of endpoint
+# app.router.redirect_slashes = False
 
 app.include_router(router)
 
