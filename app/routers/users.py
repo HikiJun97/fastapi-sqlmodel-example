@@ -13,16 +13,23 @@ router = APIRouter(prefix="/users", tags=["users"])
 @router.get("")
 async def get_user(
     session: Annotated[AsyncSession, Depends(get_async_session)],
-    # id: Annotated[int, Query(title="Query user through user id", description="Query user through user id")],
-    name: Annotated[
-        str,
-        Query(
-            title="Query user through user name",
-            description="Query user through user name",
-        ),
-    ],
+    id: Annotated[int | None, Query()] = None,
+    name: Annotated[str | None, Query()] = None,
+    email: Annotated[str | None, Query()] = None,
 ):
-    users = (await session.scalars(select(User).where(User.name == name))).one()
+    select_query = select(User)
+    if id is not None:
+        select_query = select_query.where(User.id == id)
+    if name is not None:
+        select_query = select_query.where(User.name == name)
+    if email is not None:
+        select_query = select_query.where(User.email == email)
+    if id is None and name is None and email is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="There's no query parameter"
+        )
+
+    users: list = (await session.scalars(select_query)).all()
     return users
 
 
