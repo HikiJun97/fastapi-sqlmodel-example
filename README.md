@@ -5,9 +5,9 @@
 **app/core/database/create_table.py** is independent from this project.
 It's for initializing MySQL Database.
 
-## Setting ENVs
+## Setting Environment Variables
 
-Before launching uvicorn server, set environment variables below.
+Before launching uvicorn server, you must set environment variables below.
 
 - DB_HOST
 - DB_PASSWORD
@@ -16,5 +16,10 @@ Before launching uvicorn server, set environment variables below.
 - DATABASE
 - API_KEY
 
-You can set envs with creating **app/.env** for python-dotenv or in Dockerfile.
 These variables are refered from **Config** class in **app/config.py**.
+
+You can set envs through creating **.env** in parent directory of **app**
+for both python-dotenv and docker-compose.
+If you open docker-compose.yml, you can see where the compose file read envs from.
+
+Or, you can set envs in Dockerfile to configure envs while building docker image.
