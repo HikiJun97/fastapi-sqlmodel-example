@@ -1,40 +1,26 @@
-from fastapi import FastAPI, HTTPException, Security
-from fastapi.exceptions import RequestValidationError
-from starlette.exceptions import HTTPException as StarletteHTTPException
-from fastapi.responses import PlainTextResponse
-from fastapi.exception_handlers import (
-    http_exception_handler,
-    request_validation_exception_handler,
-)
-from app.routers.main import router
-from contextlib import asynccontextmanager
-from app.core.database.engine import async_engine
+from fastapi import FastAPI, Security
+from app.routers.root import router
 from app.dependencies import auth_api_key
-from dotenv import load_dotenv
+from app.core.fastapi_configs import FastAPIConfigs
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    yield
-    await async_engine.dispose()
-
-
-app = FastAPI(lifespan=lifespan, dependencies=[Security(auth_api_key)])
-app.router.redirect_slashes = (
-    False  # 엔드포인트 끝의 '/'로 인한 307 Temporary Redirect 방지
+app = FastAPI(
+    # docs_url=None,  # Comment out these two codes with option docs_url, redoc_url if you want to disable api documentations
+    # redoc_url=None,
+    lifespan=FastAPIConfigs.lifespan,
+    dependencies=[Security(auth_api_key)],
 )
+
+FastAPIConfigs(app)  # define lifespan, exception handlers
+
+# prevent 307 Temporary Redirect due to '/' at the end of endpoint
+app.router.redirect_slashes = False
+
 app.include_router(router)
-
-
-@app.exception_handler(StarletteHTTPException)
-async def custom_http_exception_handler(request, exc):
-    return await http_exception_handler(request, exc)
-
-
-@app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request, exc):
-    return await request_validation_exception_handler(request, exc)
 
 
 @app.get("/")
 async def root():
     return {"msg": "main page"}
+
+
+# Launch this server with command "uvicorn app.main:app --host 0.0.0.0 --port 8000" from source directory of this repository
