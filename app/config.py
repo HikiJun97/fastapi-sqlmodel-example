@@ -10,3 +10,5 @@ class Config:
     DB_PASSWORD = os.getenv("DB_PASSWORD")
     DB_PORT = os.getenv("DB_PORT")
     DATABASE = os.getenv("DATABASE")
+
+    API_KEY = os.getenv("API_KEY")
