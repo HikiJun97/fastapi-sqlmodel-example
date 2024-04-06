@@ -12,4 +12,6 @@ COPY app /workspace/app
 
 WORKDIR /workspace
 
+ENV DB_HOST="host.docker.internal"
+
 ENTRYPOINT ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
