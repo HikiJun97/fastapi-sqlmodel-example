@@ -1,4 +1,4 @@
-from typing import Annotated, Any
+from typing import Annotated, Sequence, Any
 from fastapi import APIRouter, HTTPException, Depends, Query, Path, status
 from sqlalchemy import select, insert, delete
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -29,7 +29,7 @@ async def get_user(
             status_code=status.HTTP_400_BAD_REQUEST, detail="There's no query parameter"
         )
 
-    users: list = (await session.scalars(select_query)).all()
+    users: Sequence[User] = (await session.scalars(select_query)).all()
     return users
 
 
