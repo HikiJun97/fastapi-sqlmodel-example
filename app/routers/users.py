@@ -1,7 +1,10 @@
 from typing import Annotated, Sequence, Any
 from fastapi import APIRouter, HTTPException, Depends, Query, Path, status
-from sqlalchemy import select, insert, delete
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel import select
+from sqlmodel.ext.asyncio.session import AsyncSession
+
+# from sqlalchemy import select, insert, delete
+# from sqlalchemy.ext.asyncio import AsyncSession
 from app.schemas.user_schemas import UserUpdate, UserCreate, UserReplace
 from app.core.database.models import User
 from app.dependencies import get_async_session
@@ -29,18 +32,16 @@ async def get_user(
             status_code=status.HTTP_400_BAD_REQUEST, detail="There's no query parameter"
         )
 
-    users: Sequence[User] = (await session.scalars(select_query)).all()
+    users: Sequence[User] = (await session.exec(select_query)).all()
     return users
 
 
 @router.post("", status_code=status.HTTP_201_CREATED)
 async def create_user(
-    session: Annotated[AsyncSession, Depends(get_async_session)], user_data: UserCreate
+    session: Annotated[AsyncSession, Depends(get_async_session)], user: User
 ):
-    session.add(
-        User(name=user_data.name, email=user_data.email, password=user_data.password)
-    )
-    return {"msg": "new user inserted"}
+    session.add(user)
+    return user
 
 
 @router.patch("/{user_id}")
@@ -62,7 +63,8 @@ async def replace_user(
     user_data: UserReplace,
     user_id: int = Path(title="The ID of user to update"),
 ):
-    user = (await session.scalars(select(User).where(User.id == user_id))).one()
+    # user = (await session.scalars(select(User).where(User.id == user_id))).one()
+    user = select(User).where(User.id == user_id)
     for key, value in user_data.model_dump().items():
         setattr(user, key, value)
     return {"msg": "user replaced"}

@@ -5,13 +5,13 @@ from fastapi import Depends, Security, HTTPException, status
 from fastapi.security import HTTPBasic, HTTPBasicCredentials, APIKeyHeader
 from app.core.database.engine import async_engine
 from app.config import Config
-from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
+from sqlalchemy.ext.asyncio import async_sessionmaker
+from sqlmodel.ext.asyncio.session import AsyncSession
 
 
 async def get_async_session():
     async_session = async_sessionmaker(
         expire_on_commit=False,
-        autocommit=False,
         autoflush=False,
         bind=async_engine,
         class_=AsyncSession,
