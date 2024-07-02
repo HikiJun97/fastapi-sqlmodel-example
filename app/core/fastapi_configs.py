@@ -1,12 +1,13 @@
-from fastapi import FastAPI, HTTPException
 from contextlib import asynccontextmanager
-from app.core.database.engine import async_engine
-from fastapi.exceptions import RequestValidationError
-from starlette.exceptions import HTTPException as StarletteHTTPException
+
+from core.database.engine import async_engine, create_table
+from fastapi import FastAPI, HTTPException
 from fastapi.exception_handlers import (
     http_exception_handler,
     request_validation_exception_handler,
 )
+from fastapi.exceptions import RequestValidationError
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 
 class FastAPIConfigs:
@@ -16,6 +17,7 @@ class FastAPIConfigs:
     @classmethod
     @asynccontextmanager
     async def lifespan(cls, app: FastAPI):
+        await create_table(async_engine)
         yield
         await async_engine.dispose()
 

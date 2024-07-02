@@ -1,10 +1,11 @@
 import os
 import secrets
 from typing import Annotated
-from fastapi import Depends, Security, HTTPException, status
-from fastapi.security import HTTPBasic, HTTPBasicCredentials, APIKeyHeader
-from app.core.database.engine import async_engine
-from app.config import Config
+
+from config import Config
+from core.database.engine import async_engine
+from fastapi import Depends, HTTPException, Security, status
+from fastapi.security import APIKeyHeader, HTTPBasic, HTTPBasicCredentials
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -24,6 +25,8 @@ async def get_async_session():
 def auth_api_key(
     api_key: str = Security(APIKeyHeader(name="Authorization")),
 ):
+    print(f"Received api_key: {api_key} / Config.API_KEY: {Config.API_KEY}")
+
     if api_key != Config.API_KEY:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
 

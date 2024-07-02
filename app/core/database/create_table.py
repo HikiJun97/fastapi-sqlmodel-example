@@ -1,12 +1,9 @@
 import asyncio
 import os
+
 from dotenv import load_dotenv
-from sqlalchemy.ext.asyncio import (
-    create_async_engine,
-    AsyncEngine,
-    AsyncAttrs,
-)
-from sqlalchemy import String, Integer
+from sqlalchemy import Integer, String
+from sqlalchemy.ext.asyncio import AsyncAttrs, AsyncEngine, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 load_dotenv()
