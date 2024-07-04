@@ -1,11 +1,10 @@
 from typing import Annotated, List, Sequence
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
-from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
+from fastapi import APIRouter, Depends, Path, Query, status
 
 from core.database.models import User, UserPublic, UserCreate, UserUpdate
 from dependencies import get_async_session
-from schemas.user_schemas import UserCreate, UserUpdate  # , UserReplace
 from password_utils import PasswordUtils
 from utils import user_not_found
 
@@ -31,10 +30,6 @@ async def get_user(
         select_query = select_query.where(User.name == name)
     if email is not None:
         select_query = select_query.where(User.email == email)
-    # if id is None and name is None and email is None:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_400_BAD_REQUEST, detail="There's no query parameter"
-    #     )
 
     users: Sequence[User] = (await session.exec(select_query)).all()
     return users

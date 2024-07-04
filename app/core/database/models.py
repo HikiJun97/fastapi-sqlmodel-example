@@ -1,13 +1,15 @@
 from sqlmodel import Field, SQLModel
 
 
+rfc_5322_email_regex: str = (
+    r"/^[-0-9A-Za-z!#$%&'*+/=?^_`{|}~.]+@[-0-9A-Za-z!#$%&'*+/=?^_`{|}~]+[.]{1}[0-9A-Za-z]/"
+)
+
+
 class UserBase(SQLModel):
     name: str = Field(max_length=30, nullable=False)
-    email: str = Field(
-        max_length=320,
-        nullable=False,
-        regex=r"^(?=.{1,64}@.{1,255}$)(?=.{6,320}$)[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$",
-    )
+    email: str = Field(max_length=320, nullable=False,
+                       regex=rfc_5322_email_regex)
 
 
 class User(UserBase, table=True):
@@ -26,9 +28,7 @@ class UserCreate(UserBase):
 class UserUpdate(SQLModel):
     name: str | None = Field(max_length=30, nullable=False)
     email: str | None = Field(
-        max_length=320,
-        nullable=False,
-        regex=r"^(?=.{1,64}@.{1,255}$)(?=.{6,320}$)[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$",
+        max_length=320, nullable=False, regex=rfc_5322_email_regex
     )
     password: str | None = Field(min_length=10, nullable=False)
 
