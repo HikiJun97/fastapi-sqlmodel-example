@@ -1,4 +1,4 @@
-FROM python:3.11.8-slim-bookworm as build
+FROM python:3.12-slim-bookworm as build
 
 RUN apt-get update
 
@@ -10,8 +10,8 @@ RUN pip install -r /workspace/requirements.txt
 
 COPY app /workspace/app
 
-WORKDIR /workspace
+WORKDIR /workspace/app
 
 ENV DB_HOST="host.docker.internal"
 
-ENTRYPOINT ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+ENTRYPOINT ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -11,7 +11,7 @@ services:
       DB_PORT: 3306
       DB_NAME: sqlmodel
       API_KEY: api-key 
-    entrypoint: "uvicorn app.main:app --host 0.0.0.0 --port 8000"
+    entrypoint: "uvicorn main:app --host 0.0.0.0 --port 8000"
     depends_on:
       db:
         condition: service_healthy
@@ -21,6 +21,8 @@ services:
   db:
     image: mariadb:latest
     container_name: mariadb
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
       MARIADB_ROOT_PASSWORD: password
     healthcheck:
