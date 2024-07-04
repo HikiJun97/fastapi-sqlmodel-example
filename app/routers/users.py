@@ -1,12 +1,11 @@
-from typing import Annotated, List, Sequence
+from typing import Annotated, List, Sequence, Dict, cast
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
-from fastapi import APIRouter, Depends, Path, Query, status
+from fastapi import APIRouter, Depends, Path, Query, HTTPException, status
 
-from core.database.models import User, UserPublic, UserCreate, UserUpdate
+from core.database.models import User, UserPublic, UserCreate, UserUpdate, UserReplace
 from dependencies import get_async_session
 from password_utils import PasswordUtils
-from utils import user_not_found
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -39,9 +38,9 @@ async def get_user(
 async def create_user(
     session: Annotated[AsyncSession, Depends(get_async_session)], user: UserCreate
 ):
-    hashed_password = PasswordUtils.hash_password(user.password)
-    db_user = User.model_validate(
-        user, update={HASHED_PASSWORD: hashed_password})
+    hashed_password = PasswordUtils.hash(user.password)
+    extra_data = {HASHED_PASSWORD: hashed_password}
+    db_user = User.model_validate(user, update=extra_data)
     session.add(db_user)
     # Commit is necessary for validating response model as "id" is None before commit
     await session.commit()
@@ -56,41 +55,53 @@ async def update_user(
     user_id: Annotated[int, Path(title="The ID of user to update")],
 ):
     db_user = await session.get(User, user_id)
-    db_user = user_not_found(db_user)
+    if db_user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
+
     user_data = user.model_dump(exclude_unset=True)
-    db_user.sqlmodel_update(
-        user_data,
-        update=(
-            {HASHED_PASSWORD: PasswordUtils.hash_password(user_data[PASSWORD])}
-            if PASSWORD in user_data
-            else {}
-        ),
-    )
+    extra_data = dict()
+    if password := user_data[PASSWORD]:
+        hashed_password = PasswordUtils.hash(password)
+        extra_data[HASHED_PASSWORD] = hashed_password
+
+    db_user.sqlmodel_update(user_data, update=extra_data)
     session.add(db_user)
     return db_user
 
 
-@router.delete("/{user_id}")
+@router.delete("/{user_id}", response_model=Dict[str, UserPublic])
 async def delete_user(
     session: Annotated[AsyncSession, Depends(get_async_session)],
     user_id: Annotated[int, Path(title="The ID of user to delete")],
 ):
     user = await session.get(User, user_id)
-    user = user_not_found(user)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
     await session.delete(user)
     return {"deleted user": user}
 
 
-# @router.put("/{user_id}")
-# async def replace_user(
-#     session: Annotated[AsyncSession, Depends(get_async_session)],
-#     user_data: UserReplace,
-#     user_id: int = Path(title="The ID of user to update"),
-# ):
-#     # user = (await session.scalars(select(User).where(User.id == user_id))).one()
-#     user = select(User).where(User.id == user_id)
-#     db_user = await session.get(User, user_id)
-#
-#     for key, value in user_data.model_dump().items():
-#         setattr(user, key, value)
-#     return {"msg": "user replaced"}
+@router.put("/{user_id}", response_model=UserPublic)
+async def replace_user(
+    session: Annotated[AsyncSession, Depends(get_async_session)],
+    user: UserReplace,
+    user_id: int = Path(title="The ID of user to replace/create"),
+):
+    db_user = await session.get(User, user_id)
+    hashed_password = PasswordUtils.hash(user.password)
+    extra_data = {HASHED_PASSWORD: hashed_password}
+
+    # If user exists, replace it, else create a new user
+    if db_user is None:
+        db_user = User.model_validate(user, update=extra_data)
+    else:
+        user_data = user.model_dump(exclude_unset=True)
+        db_user.sqlmodel_update(user_data, update=extra_data)
+
+    session.add(db_user)
+    await session.commit()
+    return db_user
