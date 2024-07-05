@@ -8,7 +8,8 @@ rfc_5322_email_regex: str = (
 
 class UserBase(SQLModel):
     name: str = Field(max_length=30, nullable=False)
-    email: str = Field(max_length=320, nullable=False, pattern=rfc_5322_email_regex)
+    # Issue with pattern argument, regex arg doesn't work
+    email: str = Field(max_length=320, nullable=False)
 
 
 class User(UserBase, table=True):
@@ -26,9 +27,8 @@ class UserCreate(UserBase):
 
 class UserUpdate(SQLModel):
     name: str | None = Field(max_length=30, nullable=False)
-    email: str | None = Field(
-        max_length=320, nullable=False, pattern=rfc_5322_email_regex
-    )
+    # Issue with pattern argument, regex arg doesn't work
+    email: str | None = Field(max_length=320, nullable=False)
     password: str | None = Field(min_length=10, nullable=False)
 
 
