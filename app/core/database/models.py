@@ -34,14 +34,3 @@ class UserUpdate(SQLModel):
 
 class UserReplace(UserCreate):
     pass
-
-
-if __name__ == "__main__":
-    import re
-
-    try:
-        user = UserBase(name="John", email="string")
-        print(user)
-    except Exception as e:
-        print("Error:")
-        print(e)
