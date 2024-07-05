@@ -1,25 +1,18 @@
-# fastapi-example
+# fastapi-sqlmodel-example
 
-## What is create_table.py for?
+This is a simple async example of FastAPI with SQLModel. There's no async code in SQLModel documentation yet, so I decided to create this example.
 
-**app/core/database/create_table.py** is independent from this project.
-It's for initializing MySQL Database.
+Notice: There is an issue with the sqlmodel.FieldInfo class, which inherits from the pydantic.FieldInfo class. Starting from Pydantic v2, it uses the argument "pattern" instead of "regex", but SQLModel still only accepts "regex". By adding the "pattern" argument to the Field module, which creates a FieldInfo instance, you can use the "pattern" argument in sqlmodel.Field in the same way as in pydantic.Field.
 
 ## Setting Environment Variables
 
-Before launching uvicorn server, you must set environment variables below.
+If you want to use your own database, you need to change the environment variables in the docker-compose.yml file.
 
 - DB_HOST
-- DB_PASSWORD
+- DB_PASS
 - DB_HOST
 - DB_PORT
-- DATABASE
+- DB_NAME
 - API_KEY
 
 These variables are refered from **Config** class in **app/config.py**.
-
-You can set envs through creating **.env** in parent directory of **app**
-for both python-dotenv and docker-compose.
-If you open docker-compose.yml, you can see where the compose file read envs from.
-
-Or, you can set envs in Dockerfile to configure envs while building docker image.
